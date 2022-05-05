@@ -49,6 +49,45 @@ public class ArbolBinarioBusqueda<K extends Comparable<K>,V> implements IArbolBu
             nodoAnterior.setHijoDerecho(nuevoNodo);
         }
     }
+    
+    @Override
+    public void InsertarR(K claveAInsertar,V valorAInsertar) throws NullPointerException{
+        if(claveAInsertar==null){
+            throw new NullPointerException("clave nula");
+        }
+        if(valorAInsertar==null){
+            throw new NullPointerException("valor nula");
+        }
+        //methd_1.0:recursivo
+        this.raiz=insertar(this.raiz,claveAInsertar,valorAInsertar);
+    }
+    
+    /**
+     * methd_1.0:recursivo_insertar
+     */
+    private NodoBinario<K,V> insertar(NodoBinario<K,V> nodoActual,K claveAInsertar,V valorAInsertar){
+        //tambien sirve si en caso el nodo es nulo 
+        //entonces lo creara 
+        if(NodoBinario.esNodoVacio(nodoActual)){    //es vacio el nodo
+            NodoBinario<K,V> nuevoNodo=new NodoBinario<>(claveAInsertar,valorAInsertar);
+            return nuevoNodo;
+        }
+        K claveActual=nodoActual.getClave();
+        if(claveAInsertar.compareTo(claveActual)>0){    //clave a insertar es mayor 
+            NodoBinario<K,V> supuestoHijoDerecha=insertar(nodoActual.getHijoDerecho(),claveAInsertar,valorAInsertar);
+            nodoActual.setHijoDerecho(supuestoHijoDerecha);
+            return nodoActual;
+        }
+        if(claveAInsertar.compareTo(claveActual)<0){    //clave a insertar es menor
+            NodoBinario<K,V> supuestoHijoIzquierdo=insertar(nodoActual.getHijoIzquierdo(),claveAInsertar,valorAInsertar);
+            nodoActual.setHijoIzquierdo(supuestoHijoIzquierdo);
+            return nodoActual;
+        }
+        //encontro el nodo 
+        //solo debemos reemplazar su valor
+        nodoActual.setValor(valorAInsertar);
+        return nodoActual;
+    }
 
     @Override
     public V eliminar(K claveAEliminar) throws ExceptionClaveNoExiste {
@@ -244,7 +283,19 @@ public class ArbolBinarioBusqueda<K extends Comparable<K>,V> implements IArbolBu
 
     @Override
     public int altura() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return altura(this.raiz);
+    }
+    
+    public int altura(NodoBinario<K,V> nodoActual){
+        if(NodoBinario.esNodoVacio(nodoActual)){
+            return 0;
+        }
+        int alturaPorDerecha=altura(nodoActual.getHijoDerecho());
+        int alturaPorIzquierda=altura(nodoActual.getHijoIzquierdo());
+        if(alturaPorDerecha>alturaPorIzquierda){
+            return alturaPorDerecha+1;
+        }
+        return alturaPorIzquierda+1;
     }
 
     @Override
@@ -256,7 +307,61 @@ public class ArbolBinarioBusqueda<K extends Comparable<K>,V> implements IArbolBu
     public boolean esArbolVacio() {
         return NodoBinario.esNodoVacio(this.raiz);
     }
-
+    /**
+    * nivel: se cuenta desde 0
+    * altura: desde 1
+    */
+    
+    @Override
+    public int cantHijosDerechosNivel(int nivel){
+        /*if(nivel>this.altura()-1){
+            return 0;
+        }
+        return cantHijosDerechosNivel(this.raiz,nivel);*/
+        int cant=0;
+        int cont=0;
+        if(!this.esArbolVacio()){
+            Queue <NodoBinario<K,V>> colaDeNodos=new LinkedList<>();
+            colaDeNodos.offer(this.raiz);
+            while(!colaDeNodos.isEmpty()){
+                NodoBinario<K,V> nodoActual=colaDeNodos.poll();
+                
+                if(!nodoActual.esVacioHijoIzquierdo()){
+                    colaDeNodos.offer(nodoActual.getHijoIzquierdo());
+                }
+                if(!nodoActual.esVacioHijoDerecho()){
+                    colaDeNodos.offer(nodoActual.getHijoDerecho());
+                    //cuenta desde ya lo que bajo el hijo derecho y lo acumula
+                    if(cont>nivel){
+                        cant++;
+                    }
+                }
+                cont++;
+            }
+        }
+        return cant;
+    }
+    
+    private int cantHijosDerechosNivel(NodoBinario<K,V> nodoActual,int nivel){
+        if(NodoBinario.esNodoVacio(nodoActual)){
+            return 0;
+        }
+        //encontre el nivel de donde debo buscar
+        if(nivel==0){
+            int cantPorIzquierda=cantHijosDerechosNivel(nodoActual.getHijoIzquierdo(),0);
+            int cantPorDerecha=cantHijosDerechosNivel(nodoActual.getHijoDerecho(),0);
+            //hago el trabajo donde elnodo es 0
+            if(!nodoActual.esVacioHijoDerecho()){
+                return cantPorIzquierda+cantPorDerecha+1;
+            }
+            return cantPorIzquierda+cantPorDerecha;
+            
+        }
+        int cantPorIzquierda=cantHijosDerechosNivel(nodoActual.getHijoIzquierdo(),nivel-1);
+        int cantPorDerecha=cantHijosDerechosNivel(nodoActual.getHijoDerecho(),nivel-1);
+        return cantPorIzquierda+cantPorDerecha;
+    }  
+    
     @Override
     public List<K> recorridoPorNiveles() {
         List<K> recorrido=new ArrayList<>();
@@ -276,5 +381,5 @@ public class ArbolBinarioBusqueda<K extends Comparable<K>,V> implements IArbolBu
         }
         return recorrido;
     }
-    
+
 }

@@ -12,6 +12,7 @@ import java.util.List;
  */
 public interface IArbolBusqueda<K extends Comparable <K>,V> {
     void Insertar(K claveAInsertar,V valorAInsertar) throws NullPointerException;
+    void InsertarR(K claveAInsertar,V valorAInsertar) throws NullPointerException;
     V eliminar(K claveAEliminar) throws ExceptionClaveNoExiste;
     V buscar(K claveABuscar);
     boolean contiene(K claveAVuscar);
@@ -21,6 +22,7 @@ public interface IArbolBusqueda<K extends Comparable <K>,V> {
     boolean esArbolVacio();
     K minimo();
     K maximo();
+    int cantHijosDerechosNivel(int nivel);
     int contarNodosConHijosDerecho();
     int contarNodosConHijosDerechoR();
     int contarNodosConHijosIzquierdoR();
